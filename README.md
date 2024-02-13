@@ -6,8 +6,24 @@ Please note that the default extrinsics are based on the nuScenes dataset and lo
 
 Download CARLA (either in Docker or directly on your server). If using Docker, please refer to the included Dockerfile.
 
-Make sure these dependencies are installed:
+```bash
+conda create -n carla python=3.8 -y
+conda activate carla
+pip install --user pygame numpy && pip3 install --user pygame numpy
+```
 
+https://github.com/carla-simulator/carla/blob/master/Docs/download.md 
+Click on
+https://github.com/carla-simulator/carla/releases/tag/0.9.14/ 
+and then download and extract the file
+
+```bash
+cd /home/abhinav/project/CARLA_0.9.14
+./ImportAssets.sh
+```
+
+
+Make sure these dependencies are installed:
 ```
 pip install nuscenes-devkit pygame networkx
 ```
