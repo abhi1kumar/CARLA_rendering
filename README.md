@@ -12,7 +12,7 @@ conda activate carla
 pip install --user pygame numpy && pip3 install --user pygame numpy
 ```
 
-Go to [CARLA download page](https://github.com/carla-simulator/carla/blob/master/Docs/download.md). Click on [CARLA 0.9.14](https://github.com/carla-simulator/carla/releases/tag/0.9.14/ 
+Go to [CARLA download page](https://github.com/carla-simulator/carla/blob/master/Docs/download.md). Click on [CARLA 0.9.14](https://github.com/carla-simulator/carla/releases/tag/0.9.14/)
 to download. Then, extract the file
 
 ```bash
