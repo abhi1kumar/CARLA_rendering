@@ -16,6 +16,29 @@ Please note that we used CARLA 0.9.8, but the code is also compatible with later
 
 ## Rendering
 
+```bash
+export CARLAPATH="/home/abhinav/project/CARLA_0.9.14"
+```
+
+### Bash Command for Rendering One Configuration
+
+Bash script to render a train and test set (please note paths in bash script will need to be updated):
+
+```
+bash run_new.sh -4_6 pitch_height 0 -4 0.1524 # change description, type of change, yaw, pitch, height
+```
+
+Type of change and change description are concatenated to create the save folder, e.g. pitch\_height-4\_6 indicates images within the folder have modified pitch (-4 degrees) and modified height (6 inches).
+
+### Bash Command for Rendering All Datasets
+
+Python command to render ALL train and test sets (please note that the shell command used in the script will need to be updated, as it currently uses NVIDIA NGC):
+
+```
+python run_all.py
+
+```
+
 ### Python Command
 
 Python command to render (please note the first line is for starting the CARLA server and should be modified based on your CARLA server path):
@@ -30,22 +53,3 @@ YAW: change in yaw (in degrees)
 PITCH: change in pitch (in degrees)
 HEIGHT: change in height (in meters)
 MAPNAME: We use Town03 for training and Town05 for testing datasets
-
-### Bash Command
-
-Bash script to render a train and test set (please note paths in bash script will need to be updated):
-
-```
-bash run_new.sh -4_6 pitch_height 0 -4 0.1524 # change description, type of change, yaw, pitch, height
-```
-
-Type of change and change description are concatenated to create the save folder, e.g. pitch\_height-4\_6 indicates images within the folder have modified pitch (-4 degrees) and modified height (6 inches).
-
-### Rendering All Datasets
-
-Python command to render ALL train and test sets (please note that the shell command used in the script will need to be updated, as it currently uses NVIDIA NGC):
-
-```
-python run_all.py
-
-```
