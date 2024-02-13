@@ -9,8 +9,9 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 from .annotator import auto_annotate 
 
-sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.5-py3.5-linux-x86_64.egg'))
-sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.8-py3.5-linux-x86_64.egg'))
+#sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.5-py3.5-linux-x86_64.egg'))
+#sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.8-py3.5-linux-x86_64.egg'))
+sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.14-py3.5-linux-x86_64.egg'))
 sys.path.append(os.environ['CARLAPATH'])
 import carla
 
@@ -153,6 +154,9 @@ def save_data(data, outf, trial, scene_name, skipframes, cam_adjust):
             imname = os.path.join(newf, f'{rowi:04}_{imgi:02}.jpg')
             img = Image.fromarray(img)
             img.save(imname)
+        for di,dimg in enumerate(row['depth']):
+            dname = os.path.join(newf, f'{rowi:04}_{imgi:02}.npy')
+            np.save(dname, dimg)
 
 
 def bbox_to_2d_lim(bbox, H, W):

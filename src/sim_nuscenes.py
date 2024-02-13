@@ -11,8 +11,9 @@ from PIL import Image
 from time import time
 from glob import glob
 
-sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.5-py3.5-linux-x86_64.egg'))
-sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.8-py3.5-linux-x86_64.egg'))
+#sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.5-py3.5-linux-x86_64.egg'))
+#sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.8-py3.5-linux-x86_64.egg'))
+sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.14-py3.8-linux-x86_64.egg'))
 sys.path.append(os.environ['CARLAPATH'])
 import carla
 from pygame.locals import K_0, K_9, K_ESCAPE, K_SPACE, K_d, K_a, K_s, K_w
@@ -157,6 +158,7 @@ def scrape_single(world, car_bp, ego_start, clock, display, nnpcs,
                 ]).tolist()
                 data.append({
                     'imgs': img_data,
+                    'depth': depth_data,
                     'car_bboxes': car_bboxes,
                 })
 
