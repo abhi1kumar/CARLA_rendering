@@ -10,6 +10,7 @@ from time import sleep
 from PIL import Image
 from time import time
 from glob import glob
+import random
 
 #sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.5-py3.5-linux-x86_64.egg'))
 #sys.path.append(os.path.join(os.environ['CARLAPATH'], 'dist/carla-0.9.8-py3.5-linux-x86_64.egg'))
@@ -38,8 +39,13 @@ def render(cameras, display, current_ix, headless, filter_occluded):
     if filter_occluded:
         for cam in cameras:
             image = cam['depth_q'].get()
-            image.convert(carla.ColorConverter.Depth)
-            array = np.array(image.raw_data).reshape((image.height,image.width,4))[:,:,0] * 1000 / 255
+            # The line below causes depth discretization artifact. Comment it out
+            # image.convert(carla.ColorConverter.Depth)
+            array = np.array(image.raw_data).reshape((image.height,image.width,4))
+            # Convert to metric depth
+            # https://carla.readthedocs.io/en/0.9.14/ref_sensors/#depth-camera
+            # metric_depth = (R + G * 256 + B * 256 * 256) / (256 * 256 * 256 - 1) * 1000
+            array = (array[:, :, 2] + array[:, :, 1] * 256.0 + array[:, :, 0] * 256.0 * 256.0) / (256 * 256 * 256 - 1) * 1000.0
             depth_data.append(array.copy())
 
             image = cam['seman_q'].get()
@@ -219,7 +225,9 @@ def scrape(host='127.0.0.1', port=2000, width=512, height=512, timeout=30.0, ntr
            filter_occluded=True,
            ):
     filter_occluded=True
+    os.environ['PYTHONHASHSEED'] = str(rnd_seed)
     np.random.seed(rnd_seed)
+    random.seed(rnd_seed)
     pos_inits, pos_agents, world, calib, car_bp, pos_weathers, scene_names, ncarinfo, client = init_env(host, port, width, height, timeout, calibf,
                                                                                                         ncarcalib, rnd_seed, map_name, p_assets)
 
