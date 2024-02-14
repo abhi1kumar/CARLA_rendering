@@ -149,14 +149,32 @@ def save_data(data, outf, trial, scene_name, skipframes, cam_adjust):
         info = {'boxes': [row['car_bboxes'] for row in data[::skipframes]], 'scene_calib': scene_name,
                 'cam_adjust': cam_adjust}
         json.dump(info, writer)
+
+    # Make image/depth/seman folders
+    imagef = os.path.join(newf, 'image')
+    depthf = os.path.join(newf, 'depth')
+    semanf = os.path.join(newf, 'seman')
+    os.makedirs(imagef, exist_ok= True)
+    os.makedirs(depthf, exist_ok= True)
+    os.makedirs(semanf, exist_ok= True)
     for rowi,row in enumerate(data[::skipframes]):
+
         for imgi,img in enumerate(row['imgs']):
-            imname = os.path.join(newf, f'{rowi:04}_{imgi:02}.jpg')
+            imname = os.path.join(imagef, f'{rowi:04}_{imgi:02}.jpg')
             img = Image.fromarray(img)
             img.save(imname)
         for di,dimg in enumerate(row['depth']):
-            dname = os.path.join(newf, f'{rowi:04}_{imgi:02}.npy')
+            dname = os.path.join(depthf, f'{rowi:04}_{imgi:02}.npy')
             np.save(dname, dimg)
+        for si,simg in enumerate(row['seman']):
+            sname = os.path.join(semanf, f'{rowi:04}_{imgi:02}.npy')
+            np.save(sname, simg)
+            # Do NOT save as jpeg or png
+            # sname = os.path.join(semanf, f'{rowi:04}_{imgi:02}.jpg')
+            # simg = Image.fromarray(simg)
+            # simg.save(sname)
+            # sname = os.path.join(semanf, f'{rowi:04}_{imgi:02}.png')
+            # simg.save(sname)
 
 
 def bbox_to_2d_lim(bbox, H, W):

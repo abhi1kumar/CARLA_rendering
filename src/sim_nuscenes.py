@@ -27,6 +27,7 @@ from .annotator import auto_annotate
 def render(cameras, display, current_ix, headless, filter_occluded):
     img_data = []
     depth_data = []
+    seman_data = []
     for cam in cameras:
         image = cam['queue'].get()
         array = np.frombuffer(image.raw_data, dtype=np.dtype("uint8"))
@@ -40,23 +41,38 @@ def render(cameras, display, current_ix, headless, filter_occluded):
             image.convert(carla.ColorConverter.Depth)
             array = np.array(image.raw_data).reshape((image.height,image.width,4))[:,:,0] * 1000 / 255
             depth_data.append(array.copy())
+
+            image = cam['seman_q'].get()
+            array = np.frombuffer(image.raw_data, dtype=np.dtype("uint8"))
+            array = np.reshape(array, (image.height, image.width, 4))
+            array = array[:, :, :3]
+            array = array[:, :, ::-1]
+            # Only the first channel contains semantics
+            array = array[:, :, 0]
+            seman_data.append(array.copy())
+
     if not headless:
         surface = pygame.surfarray.make_surface(img_data[current_ix].swapaxes(0, 1))
         display.blit(surface, (0, 0))
-    return img_data, depth_data
+    return img_data, depth_data, seman_data
 
 
-def camera_blueprint(world, width, height, VIEW_FOV, motion_blur_strength, depth_camera=False):
+def camera_blueprint(world, width, height, VIEW_FOV, motion_blur_strength, name= "rgb"):
     """
     Returns camera blueprint.
     """
-    bp_name = 'sensor.camera.depth' if depth_camera else 'sensor.camera.rgb'
+    if name == "rgb":
+        bp_name = 'sensor.camera.rgb'
+    elif name == "depth":
+        bp_name = 'sensor.camera.depth'
+    elif name == "seman":
+        bp_name = 'sensor.camera.semantic_segmentation'
     camera_bp = world.get_blueprint_library().find(bp_name)
     camera_bp.set_attribute('image_size_x', str(width))
     camera_bp.set_attribute('image_size_y', str(height))
     camera_bp.set_attribute('fov', str(VIEW_FOV))
 
-    if motion_blur_strength is not None and not depth_camera:
+    if motion_blur_strength is not None and name == "rgb":
         print('setting blur', motion_blur_strength)
         camera_bp.set_attribute('motion_blur_intensity', str(motion_blur_strength))
         camera_bp.set_attribute('motion_blur_max_distortion', str(motion_blur_strength))
@@ -71,9 +87,10 @@ def get_cameras(calib, world, width, height, car, motion_blur_strength, cam_adju
         camera_transform = carla.Transform(carla.Location(x=info['trans'][0]+cam_adjust[camname]['x'], y=info['trans'][1], z=info['trans'][2] + cam_adjust[camname]['height']),
                                            carla.Rotation(yaw=cam_adjust[camname]['yaw'], pitch=0.0+cam_adjust[camname]['pitch'], roll=0.0))
 
-        camera = world.spawn_actor(camera_blueprint(world, width, height, info['fov']+cam_adjust[camname]['fov'], motion_blur_strength), camera_transform, attach_to=car)
+        camera           = world.spawn_actor(camera_blueprint(world, width, height, info['fov']+cam_adjust[camname]['fov'], motion_blur_strength), camera_transform, attach_to=car)
         if filter_occluded:
-            depth_camera = world.spawn_actor(camera_blueprint(world, width, height, info['fov']+cam_adjust[camname]['fov'], motion_blur_strength, depth_camera=True), camera_transform, attach_to=car)
+            depth_camera = world.spawn_actor(camera_blueprint(world, width, height, info['fov']+cam_adjust[camname]['fov'], motion_blur_strength, name= "depth"), camera_transform, attach_to=car)
+            seman_camera = world.spawn_actor(camera_blueprint(world, width, height, info['fov']+cam_adjust[camname]['fov'], motion_blur_strength, name= "seman"), camera_transform, attach_to=car)
 
         calibration = np.identity(3)
         calibration[0, 2] = width / 2.0
@@ -84,7 +101,7 @@ def get_cameras(calib, world, width, height, car, motion_blur_strength, cam_adju
         if not filter_occluded:
             cameras.append({'cam': camera, 'queue': queue.Queue()})
         else:
-            cameras.append({'cam': camera, 'queue': queue.Queue(), 'depth_cam': depth_camera, 'depth_q': queue.Queue()})
+            cameras.append({'cam': camera, 'queue': queue.Queue(), 'depth_cam': depth_camera, 'depth_q': queue.Queue(), 'seman_cam': seman_camera, 'seman_q': queue.Queue()})
 
         break # because we only render the front facing camera for viewpoint robustness paper
 
@@ -92,6 +109,7 @@ def get_cameras(calib, world, width, height, car, motion_blur_strength, cam_adju
         v['cam'].listen(v['queue'].put)
         if filter_occluded:
             v['depth_cam'].listen(v['depth_q'].put)
+            v['seman_cam'].listen(v['seman_q'].put)
 
     return cameras
 
@@ -115,6 +133,7 @@ def scrape_single(world, car_bp, ego_start, clock, display, nnpcs,
         for cam in cameras:
             cam['cam'].destroy()
             cam['depth_cam'].destroy()
+            cam['seman_cam'].destroy()
         car.destroy()
         for npc in npcs:
             npc.destroy()
@@ -132,7 +151,7 @@ def scrape_single(world, car_bp, ego_start, clock, display, nnpcs,
             if not headless:
                 clock.tick_busy_loop(20)
 
-            img_data, depth_data = render(cameras, display, current_ix, headless, filter_occluded)
+            img_data, depth_data, seman_data = render(cameras, display, current_ix, headless, filter_occluded)
 
             # bounding boxes
             bboxes = ClientSideBoundingBoxes.get_global_bbox(npcs)
@@ -159,6 +178,7 @@ def scrape_single(world, car_bp, ego_start, clock, display, nnpcs,
                 data.append({
                     'imgs': img_data,
                     'depth': depth_data,
+                    'seman': seman_data,
                     'car_bboxes': car_bboxes,
                 })
 
