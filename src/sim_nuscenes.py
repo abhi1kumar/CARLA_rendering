@@ -92,7 +92,7 @@ def render(cameras, display, current_ix, headless, filter_occluded):
     return img_data, depth_data, seman_data, lidar_data
 
 
-def camera_blueprint(world, width, height, VIEW_FOV, motion_blur_strength, name= "rgb", channels= "64", lidar_range= "70", points_per_second= "695000", rotation_frequency= "20", upper_fov="10", lower_fov= "-30"):
+def camera_blueprint(world, width, height, VIEW_FOV, motion_blur_strength, name= "rgb", channels= "32", lidar_range= "70", points_per_second= "695000", rotation_frequency= "20", upper_fov= "10", lower_fov= "-30"):
     """
     Returns camera blueprint.
     """
