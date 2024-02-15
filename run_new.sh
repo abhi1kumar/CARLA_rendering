@@ -2,22 +2,44 @@ angle=$1
 extrinsic=$2
 # angle, extrinsic, yaw, pitch, height
 
-#cp -r /tzofi/repos/scrape-bev-carla repo
-cd /home/abhinav/project/CARLA_rendering
+project_dir="/home/abhinav/project/CARLA_rendering/"
+final_dir="/media/abhinav/baap2/abhinav/datasets/viewpoint"
+carla_binary="/home/abhinav/project/CARLA_0.9.14/CarlaUE4.sh"
 
-mkdir "/media/abhinav/baap2/abhinav/datasets/viewpoint${2}${1}"
-mkdir "/home/abhinav/project/CARLA_rendering/town03"
-mkdir "/home/abhinav/project/CARLA_rendering/town05"
+log_file_dir="logs"
+town03_name="town03"
+town05_name="town05"
+arxiv_suffix=".tar.gz"
+
+town03_folder=$project_dir/$town03_name
+town05_folder=$project_dir/$town05_name
+
+town03_arxiv=$project_dir/$town03_name$arxiv_suffix
+town05_arxiv=$project_dir/$town05_name$arxiv_suffix
+
+output_dir=$final_dir${2}${1}
+
+log_file_base=$log_file_dir/${2}${1}
+town03_log_file=$log_file_base$town03_name
+town05_log_file=$log_file_base$town05_name
+
+#cp -r /tzofi/repos/scrape-bev-carla repo
+cd $project_dir
+
+mkdir $town03_folder
+mkdir $town05_folder
+mkdir $output_dir
+mkdir $log_file_dir
 
 # TRAIN DATA
-(/home/abhinav/project/CARLA_0.9.14/CarlaUE4.sh 2>&1 > /dev/null &) && (sleep 15) && (python3 -u main.py scrape --outf="/home/abhinav/project/CARLA_rendering/town03" --headless=True --rnd_seed=42 --filter_occluded=True --cam_yaw_adjust="${3}" --cam_pitch_adjust="${4}" --cam_height_adjust="${5}" --map_name="Town03" > results/scrape_town03.log)
+($carla_binary 2>&1 > /dev/null &) && (sleep 15) && (python3 -u main.py scrape --outf=$town03_folder --headless=True --rnd_seed=42 --filter_occluded=True --cam_yaw_adjust="${3}" --cam_pitch_adjust="${4}" --cam_height_adjust="${5}" --map_name="Town03" > $town03_log_file)
 
 # TEST DATA
-(/home/abhinav/project/CARLA_0.9.14/CarlaUE4.sh --world-port=2040 2>&1 > /dev/null &) && (sleep 15) && (python3 -u main.py scrape --outf="/home/abhinav/project/CARLA_rendering/town05" --headless=True --rnd_seed=42 --filter_occluded=True --cam_yaw_adjust="${3}" --cam_pitch_adjust="${4}" --cam_height_adjust="${5}" --port=2040 --map_name="Town05" > results/scrape_town05.log)
+($carla_binary --world-port=2040 2>&1 > /dev/null &) && (sleep 15) && (python3 -u main.py scrape --outf=$town05_folder --headless=True --rnd_seed=42 --filter_occluded=True --cam_yaw_adjust="${3}" --cam_pitch_adjust="${4}" --cam_height_adjust="${5}" --port=2040 --map_name="Town05" > $town05_log_file)
 
 sleep 64800s
 
-tar -cvz -f /home/abhinav/project/CARLA_rendering/town03.tar.gz /home/abhinav/project/CARLA_rendering/town03
-tar -cvz -f /home/abhinav/project/CARLA_rendering/town05.tar.gz /home/abhinav/project/CARLA_rendering/town05
-mv /home/abhinav/project/CARLA_rendering/town03.tar.gz /media/abhinav/baap2/abhinav/datasets/viewpoint${2}${1}/
-mv /home/abhinav/project/CARLA_rendering/town05.tar.gz /media/abhinav/baap2/abhinav/datasets/viewpoint${2}${1}/
+tar -cvz -f $town03_arxiv $town03_folder
+tar -cvz -f $town05_arxiv $town05_folder
+mv $town03_arxiv $output_dir
+mv $town05_arxiv $output_dir
