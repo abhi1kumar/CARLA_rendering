@@ -29,6 +29,7 @@ def render(cameras, display, current_ix, headless, filter_occluded):
     img_data = []
     depth_data = []
     seman_data = []
+    lidar_data = []
     for cam in cameras:
         image = cam['queue'].get()
         array = np.frombuffer(image.raw_data, dtype=np.dtype("uint8"))
@@ -57,13 +58,41 @@ def render(cameras, display, current_ix, headless, filter_occluded):
             array = array[:, :, 0]
             seman_data.append(array.copy())
 
+            image = cam['lidar_q'].get()
+            # See https://github.com/carla-simulator/carla/issues/2905#issuecomment-638439814
+            array = np.frombuffer(image.raw_data, dtype=np.dtype("f4")).reshape((-1, 4))
+            # Array is in lidar coordinate system, convert to camera coordinate system
+            # https://github.com/carla-simulator/carla/blob/5515d3fc4db75698a5cba3af0b63d444b04deebf/PythonAPI/examples/lidar_to_camera.py#L167-L209
+            lidar_2_world   = cam['lidar_cam'].get_transform().get_matrix()
+            world_2_camera  = np.array(cam['cam'].get_transform().get_inverse_matrix())
+            lidar_2_camera  = np.matmul(world_2_camera, lidar_2_world)
+            local_lidar_pts = array[:, :3].T
+            # Add an extra 1.0 to each 3d point so it can be multiplied by a (4, 4) matrix.
+            local_lidar_pts = np.r_[local_lidar_pts, [np.ones(local_lidar_pts.shape[1])]]
+            camera_ue4_pts  = np.dot(lidar_2_camera, local_lidar_pts) # 4 x N
+            # We must change from UE4's coordinate system to an "standard"
+            # camera coordinate system (the same used by OpenCV):
+            # ^ z                       . z
+            # |                        /
+            # |              to:      +-------> x
+            # | . x                   |
+            # |/                      |
+            # +-------> y             v y
+            # (x, y ,z) -> (y, -z, x)
+            camera_cv2_pts = np.array([
+                camera_ue4_pts[1],
+                camera_ue4_pts[2] * -1,
+                camera_ue4_pts[0]])
+            camera_cv2_pts = np.hstack((camera_cv2_pts.T, array[:, 3].reshape(-1, 1)))
+            lidar_data.append(camera_cv2_pts)
+
     if not headless:
         surface = pygame.surfarray.make_surface(img_data[current_ix].swapaxes(0, 1))
         display.blit(surface, (0, 0))
-    return img_data, depth_data, seman_data
+    return img_data, depth_data, seman_data, lidar_data
 
 
-def camera_blueprint(world, width, height, VIEW_FOV, motion_blur_strength, name= "rgb"):
+def camera_blueprint(world, width, height, VIEW_FOV, motion_blur_strength, name= "rgb", channels= "64", lidar_range= "70", points_per_second= "695000", rotation_frequency= "20", upper_fov="10", lower_fov= "-30"):
     """
     Returns camera blueprint.
     """
@@ -73,15 +102,34 @@ def camera_blueprint(world, width, height, VIEW_FOV, motion_blur_strength, name=
         bp_name = 'sensor.camera.depth'
     elif name == "seman":
         bp_name = 'sensor.camera.semantic_segmentation'
+    elif name == "lidar":
+        bp_name = 'sensor.lidar.ray_cast'
     camera_bp = world.get_blueprint_library().find(bp_name)
-    camera_bp.set_attribute('image_size_x', str(width))
-    camera_bp.set_attribute('image_size_y', str(height))
-    camera_bp.set_attribute('fov', str(VIEW_FOV))
 
-    if motion_blur_strength is not None and name == "rgb":
-        print('setting blur', motion_blur_strength)
-        camera_bp.set_attribute('motion_blur_intensity', str(motion_blur_strength))
-        camera_bp.set_attribute('motion_blur_max_distortion', str(motion_blur_strength))
+    if name in ["rgb", "depth", "seman"]:
+        camera_bp.set_attribute('image_size_x', str(width))
+        camera_bp.set_attribute('image_size_y', str(height))
+        camera_bp.set_attribute('fov', str(VIEW_FOV))
+
+        if motion_blur_strength is not None and name == "rgb":
+            print('setting blur', motion_blur_strength)
+            camera_bp.set_attribute('motion_blur_intensity', str(motion_blur_strength))
+            camera_bp.set_attribute('motion_blur_max_distortion', str(motion_blur_strength))
+
+    else:
+        # Settings for lidar scanner
+        camera_bp.set_attribute('channels'               , str(channels))
+        camera_bp.set_attribute('range'                  , str(lidar_range))
+        camera_bp.set_attribute('points_per_second'      , str(points_per_second))
+        camera_bp.set_attribute('rotation_frequency'     , str(rotation_frequency))
+        camera_bp.set_attribute('upper_fov'              , str(upper_fov))
+        camera_bp.set_attribute('lower_fov'              , str(lower_fov))
+        camera_bp.set_attribute('horizontal_fov'         , str(360))
+        # No noise settings
+        # https://github.com/carla-simulator/carla/blob/5515d3fc4db75698a5cba3af0b63d444b04deebf/PythonAPI/examples/lidar_to_camera.py#L90-L92
+        camera_bp.set_attribute('dropoff_general_rate'   , str(0.0))
+        camera_bp.set_attribute('dropoff_intensity_limit', str(1.0))
+        camera_bp.set_attribute('dropoff_zero_intensity' , str(0.0))
 
     return camera_bp
 
@@ -97,6 +145,7 @@ def get_cameras(calib, world, width, height, car, motion_blur_strength, cam_adju
         if filter_occluded:
             depth_camera = world.spawn_actor(camera_blueprint(world, width, height, info['fov']+cam_adjust[camname]['fov'], motion_blur_strength, name= "depth"), camera_transform, attach_to=car)
             seman_camera = world.spawn_actor(camera_blueprint(world, width, height, info['fov']+cam_adjust[camname]['fov'], motion_blur_strength, name= "seman"), camera_transform, attach_to=car)
+            lidar_camera = world.spawn_actor(camera_blueprint(world, width, height, info['fov']+cam_adjust[camname]['fov'], motion_blur_strength, name= "lidar"), camera_transform, attach_to=car)
 
         calibration = np.identity(3)
         calibration[0, 2] = width / 2.0
@@ -107,7 +156,7 @@ def get_cameras(calib, world, width, height, car, motion_blur_strength, cam_adju
         if not filter_occluded:
             cameras.append({'cam': camera, 'queue': queue.Queue()})
         else:
-            cameras.append({'cam': camera, 'queue': queue.Queue(), 'depth_cam': depth_camera, 'depth_q': queue.Queue(), 'seman_cam': seman_camera, 'seman_q': queue.Queue()})
+            cameras.append({'cam': camera, 'queue': queue.Queue(), 'depth_cam': depth_camera, 'depth_q': queue.Queue(), 'seman_cam': seman_camera, 'seman_q': queue.Queue(), 'lidar_cam': lidar_camera, 'lidar_q': queue.Queue()})
 
         break # because we only render the front facing camera for viewpoint robustness paper
 
@@ -116,6 +165,7 @@ def get_cameras(calib, world, width, height, car, motion_blur_strength, cam_adju
         if filter_occluded:
             v['depth_cam'].listen(v['depth_q'].put)
             v['seman_cam'].listen(v['seman_q'].put)
+            v['lidar_cam'].listen(v['lidar_q'].put)
 
     return cameras
 
@@ -140,6 +190,7 @@ def scrape_single(world, car_bp, ego_start, clock, display, nnpcs,
             cam['cam'].destroy()
             cam['depth_cam'].destroy()
             cam['seman_cam'].destroy()
+            cam['lidar_cam'].destroy()
         car.destroy()
         for npc in npcs:
             npc.destroy()
@@ -157,7 +208,7 @@ def scrape_single(world, car_bp, ego_start, clock, display, nnpcs,
             if not headless:
                 clock.tick_busy_loop(20)
 
-            img_data, depth_data, seman_data = render(cameras, display, current_ix, headless, filter_occluded)
+            img_data, depth_data, seman_data, lidar_data = render(cameras, display, current_ix, headless, filter_occluded)
 
             # bounding boxes
             bboxes = ClientSideBoundingBoxes.get_global_bbox(npcs)
@@ -185,6 +236,7 @@ def scrape_single(world, car_bp, ego_start, clock, display, nnpcs,
                     'imgs': img_data,
                     'depth': depth_data,
                     'seman': seman_data,
+                    'lidar': lidar_data,
                     'car_bboxes': car_bboxes,
                 })
 

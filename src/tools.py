@@ -154,9 +154,11 @@ def save_data(data, outf, trial, scene_name, skipframes, cam_adjust):
     imagef = os.path.join(newf, 'image')
     depthf = os.path.join(newf, 'depth')
     semanf = os.path.join(newf, 'seman')
+    lidarf = os.path.join(newf, 'lidar')
     os.makedirs(imagef, exist_ok= True)
     os.makedirs(depthf, exist_ok= True)
     os.makedirs(semanf, exist_ok= True)
+    os.makedirs(lidarf, exist_ok= True)
     for rowi,row in enumerate(data[::skipframes]):
 
         for imgi,img in enumerate(row['imgs']):
@@ -175,6 +177,9 @@ def save_data(data, outf, trial, scene_name, skipframes, cam_adjust):
             # simg.save(sname)
             # sname = os.path.join(semanf, f'{rowi:04}_{imgi:02}.png')
             # simg.save(sname)
+        for li, limg in enumerate(row['lidar']):
+            lname = os.path.join(lidarf, f'{rowi:04}_{imgi:02}.npy')
+            np.save(lname, limg)
 
 
 def bbox_to_2d_lim(bbox, H, W):
