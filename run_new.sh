@@ -26,10 +26,10 @@ town05_log_file=$log_file_base$town05_name
 #cp -r /tzofi/repos/scrape-bev-carla repo
 cd $project_dir
 
-mkdir $town03_folder
-mkdir $town05_folder
-mkdir $output_dir
-mkdir $log_file_dir
+mkdir -p $town03_folder
+mkdir -p $town05_folder
+mkdir -p $output_dir
+mkdir -p $log_file_dir
 
 # TRAIN DATA
 ($carla_binary 2>&1 > /dev/null &) && (sleep 15) && (python3 -u main.py scrape --outf=$town03_folder --headless=True --rnd_seed=42 --filter_occluded=True --cam_yaw_adjust="${3}" --cam_pitch_adjust="${4}" --cam_height_adjust="${5}" --map_name="Town03" > $town03_log_file)
