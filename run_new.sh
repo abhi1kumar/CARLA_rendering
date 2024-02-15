@@ -11,8 +11,8 @@ town03_name="town03"
 town05_name="town05"
 arxiv_suffix=".tar.gz"
 
-town03_folder=$project_dir/$town03_name
-town05_folder=$project_dir/$town05_name
+town03_folder=$project_dir/${2}${1}/$town03_name
+town05_folder=$project_dir/${2}${1}/$town05_name
 
 town03_arxiv=$project_dir/$town03_name$arxiv_suffix
 town05_arxiv=$project_dir/$town05_name$arxiv_suffix
