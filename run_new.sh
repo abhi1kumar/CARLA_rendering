@@ -2,9 +2,9 @@ angle=$1
 extrinsic=$2
 # angle, extrinsic, yaw, pitch, height
 
-project_dir="/home/abhinav/project/CARLA_rendering/"
-final_dir="/media/abhinav/baap2/abhinav/datasets/viewpoint"
-carla_binary="/home/abhinav/project/CARLA_0.9.14/CarlaUE4.sh"
+project_dir="/user/kumarab6/cvl/project/CARLA_rendering/"
+final_dir="/user/kumarab6/cvlshare/3d_datasets/carla_abhinav/"
+carla_binary="/user/kumarab6/cvl/project/CARLA_0.9.14/CarlaUE4.sh"
 
 log_file_dir="logs"
 town03_name="town03"
@@ -43,3 +43,5 @@ tar -cvz -f $town03_arxiv $town03_folder
 tar -cvz -f $town05_arxiv $town05_folder
 mv $town03_arxiv $output_dir
 mv $town05_arxiv $output_dir
+mv $town03_folder $output_dir
+mv $town05_folder $output_dir
