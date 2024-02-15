@@ -246,7 +246,7 @@ def scrape_single(world, car_bp, ego_start, clock, display, nnpcs,
     return current_ix, data
 
 
-def scrape(host='127.0.0.1', port=2000, width=512, height=512, timeout=30.0, ntrials=2500, pref=150,
+def scrape(host='127.0.0.1', port=2000, width=512, height=512, timeout=300.0, ntrials=2500, pref=150,
            calibf='./nusccalib.json', outf=None, start_ix=50, ncarcalib='./nuscncars.json',
            rnd_seed=42, headless=False, skipframes=10,
 
