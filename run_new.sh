@@ -37,9 +37,9 @@ mkdir -p $log_file_dir
 # TEST DATA
 ($carla_binary --world-port=2040 2>&1 > /dev/null &) && (sleep 15) && (python3 -u main.py scrape --outf=$town05_folder --headless=True --rnd_seed=42 --filter_occluded=True --cam_yaw_adjust="${3}" --cam_pitch_adjust="${4}" --cam_height_adjust="${5}" --port=2040 --map_name="Town05" > $town05_log_file)
 
-tar -cvz -f $town03_arxiv $town03_folder
-tar -cvz -f $town05_arxiv $town05_folder
-mv $town03_arxiv $output_dir
-mv $town05_arxiv $output_dir
+#tar -cvz -f $town03_arxiv $town03_folder
+#tar -cvz -f $town05_arxiv $town05_folder
+#mv $town03_arxiv $output_dir
+#mv $town05_arxiv $output_dir
 mv $town03_folder $output_dir
 mv $town05_folder $output_dir
