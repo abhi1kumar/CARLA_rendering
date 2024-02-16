@@ -2,9 +2,9 @@ angle=$1
 extrinsic=$2
 # angle, extrinsic, yaw, pitch, height
 
-project_dir="/user/kumarab6/cvl/project/CARLA_rendering/"
-final_dir="/user/kumarab6/cvlshare/3d_datasets/carla_abhinav/"
-carla_binary="/user/kumarab6/cvl/project/CARLA_0.9.14/CarlaUE4.sh"
+project_dir="/home/abhinav/project/CARLA_rendering/"
+final_dir="/home/abhinav/3d_datasets/carla_abhinav/"
+carla_binary="/home/abhinav/project/CARLA_0.9.14/CarlaUE4.sh"
 
 log_file_dir="logs"
 town03_name="town03"
@@ -36,8 +36,6 @@ mkdir -p $log_file_dir
 
 # TEST DATA
 ($carla_binary --world-port=2040 2>&1 > /dev/null &) && (sleep 15) && (python3 -u main.py scrape --outf=$town05_folder --headless=True --rnd_seed=42 --filter_occluded=True --cam_yaw_adjust="${3}" --cam_pitch_adjust="${4}" --cam_height_adjust="${5}" --port=2040 --map_name="Town05" > $town05_log_file)
-
-sleep 64800s
 
 tar -cvz -f $town03_arxiv $town03_folder
 tar -cvz -f $town05_arxiv $town05_folder
