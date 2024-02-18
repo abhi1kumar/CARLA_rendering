@@ -68,3 +68,17 @@ YAW: change in yaw (in degrees)
 PITCH: change in pitch (in degrees)
 HEIGHT: change in height (in meters)
 MAPNAME: We use Town03 for training and Town05 for testing datasets
+
+## License and Citation
+
+```bibtex
+@inproceedings{tzofi2023view,
+    booktitle = {ICCV},
+    author = {Klinghoffer, Tzofi and Philion, Jonah and Chen, Wenzheng and Litany, Or and Gojcic, Zan
+        and Joo, Jungseock and Raskar, Ramesh and Fidler, Sanja and Alvarez, Jose},
+    title = {Towards Viewpoint Robustness in Bird's Eye View Segmentation},
+    year = {2023}
+}
+```
+
+Copyright © 2023, NVIDIA Corporation. All rights reserved.
