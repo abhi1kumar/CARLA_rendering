@@ -2,6 +2,11 @@
 
 This repository extracts CARLA datasets at different extrinsics. Please note that the default intrinsics are based on the nuScenes dataset and loaded from the included JSON files. 
 
+Note: The convention in this code is 
+X: right
+Y: up
+Z: outside
+
 ## Prerequisites
 
 Download CARLA (either in Docker or directly on your server). If using Docker, please refer to the included Dockerfile.
