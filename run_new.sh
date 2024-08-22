@@ -32,10 +32,10 @@ mkdir -p $output_dir
 mkdir -p $log_file_dir
 
 # TEST DATA
-($carla_binary -RenderOffScreen --world-port=2040 2>&1 > /dev/null &) && (sleep 15) && (python3 -u main.py scrape --outf=$town05_folder --headless=True --rnd_seed=42 --filter_occluded=True --cam_yaw_adjust="${3}" --cam_pitch_adjust="${4}" --cam_height_adjust="${5}" --port=2040 --map_name="Town05" > $town05_log_file)
+($carla_binary -RenderOffScreen --world-port=2040 2>&1 > /dev/null &) && (sleep 15) && (python3 -u main.py scrape --outf=$town05_folder --headless=True --rnd_seed=42 --filter_occluded=True --port=2040 --map_name="Town05" --cam_yaw_adjust="${3}" --cam_pitch_adjust="${4}" --cam_height_adjust="${5}" > $town05_log_file)
 
 # TRAIN DATA
-($carla_binary -RenderOffScreen 2>&1 > /dev/null &) && (sleep 15) && (python3 -u main.py scrape --outf=$town03_folder --headless=True --rnd_seed=42 --filter_occluded=True --cam_yaw_adjust="${3}" --cam_pitch_adjust="${4}" --cam_height_adjust="${5}" --map_name="Town03" > $town03_log_file)
+($carla_binary -RenderOffScreen 2>&1 > /dev/null &)                   && (sleep 15) && (python3 -u main.py scrape --outf=$town03_folder --headless=True --rnd_seed=42 --filter_occluded=True             --map_name="Town03" --cam_yaw_adjust="${3}" --cam_pitch_adjust="${4}" --cam_height_adjust="${5}" > $town03_log_file)
 
 #tar -cvz -f $town03_arxiv $town03_folder
 #tar -cvz -f $town05_arxiv $town05_folder
