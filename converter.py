@@ -42,7 +42,7 @@ CARLA_SEMANTICS_MAP = {
 }
 
 if __name__ == '__main__':
-    debug = False
+    debug = True
     input_base_path  = "data/carla/carla_abhinav/"
     tzofi            = (input_base_path == "data/carla/splits_org")
     output_base_path = "/media/abhinav/baap2/abhinav/datasets/viewpoint/carla_kitti"
@@ -58,11 +58,11 @@ if __name__ == '__main__':
     cams   = ["CAM_FRONT"]
     color_list = ['r', 'b', 'k', 'pink']
 
-    left_to_right_matrix = np.eye(4)
-    left_to_right_matrix[1, 1] = -1
-    right_to_left_matrix = np.linalg.inv(left_to_right_matrix)
+    left_to_right = np.eye(4)
+    left_to_right[1, 1] = -1
+    right_to_left = np.linalg.inv(left_to_right)
 
-    kitti_to_carla = np.zeros((4, 4))
+    kitti_to_carla_left = np.zeros((4, 4))
     #   KITTI                          CARLA
     #      Z                     Z (up)   X
     #     /                        |     /
@@ -78,12 +78,12 @@ if __name__ == '__main__':
     #   CARLA coordinates = | 0  0  1|  | X |
     #                       | 1  0  0|  | Y |
     #                       | 0 -1  0|  | Z |
-    kitti_to_carla[0, 2] =  1
-    kitti_to_carla[1, 0] =  1
-    kitti_to_carla[2, 1] = -1
-    kitti_to_carla[3, 3] =  1
+    kitti_to_carla_left[0, 2] =  1
+    kitti_to_carla_left[1, 0] =  1
+    kitti_to_carla_left[2, 1] = -1
+    kitti_to_carla_left[3, 3] =  1
 
-    carla_to_kitti = np.linalg.inv(kitti_to_carla)
+    carla_left_to_kitti = np.linalg.inv(kitti_to_carla_left)
 
     # All intrinsics
     nusccalib = read_json('nusccalib.json')
@@ -128,7 +128,7 @@ if __name__ == '__main__':
                 extrins_4x4[:3,  3] = np.matmul(rots[0].transpose(1,0), -trans[0].reshape(-1, 1))[:, 0]
                 p2_right = np.matmul(intrins_4x4, extrins_4x4)
 
-                p2       = np.matmul(np.matmul(p2_right, left_to_right_matrix), kitti_to_carla)
+                p2       = np.matmul(np.matmul(p2_right, left_to_right), kitti_to_carla_left)
 
                 for fo in range(10):
                     img_key    =  str(fo).zfill(4) + "_00"
@@ -165,7 +165,7 @@ if __name__ == '__main__':
                     num_boxes = centers.shape[0]
                     kitti_dims    = wlh[:, [2,0,1]]
                     centers_1     = np.vstack((centers.T, np.ones((1, num_boxes))))   # 4 x N
-                    kitti_centers = np.matmul(carla_to_kitti, centers_1).T       # N x 4
+                    kitti_centers = np.matmul(carla_left_to_kitti, centers_1).T       # N x 4
                     kitti_yaw     = np.arctan2(sin_yaw, cos_yaw)
                     kitti_alpha   = convertRot2Alpha(kitti_yaw, z3d= kitti_centers[:, 2], x3d= kitti_centers[:, 0])
 
