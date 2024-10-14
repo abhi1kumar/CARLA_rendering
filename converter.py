@@ -44,7 +44,7 @@ if __name__ == '__main__':
     input_base_path  = "data/carla/carla_abhinav/"
     tzofi            = (input_base_path == "data/carla/splits_org")
     output_base_path = "/media/abhinav/baap2/abhinav/datasets/viewpoint/carla_kitti"
-    list_of_heights  = ["pitch0",  "height6", "height12", "height18", "height24", "height27", "height30"]
+    list_of_heights  = ["pitch0",  "height6", "height12", "height18", "height24", "height27", "height30",  "height-6", "height-12", "height-18", "height-24", "height-27"]
     list_of_towns    = ["town03", "town05"]
     num_folders      = 2500
 
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     carla_to_kitti = np.linalg.inv(kitti_to_carla)
 
     # All intrinsics
-    nusccalib = read_json('data/carla/nusccalib.json')
+    nusccalib = read_json('nusccalib.json')
 
     #Scene level
     for height_config in list_of_heights:
@@ -104,6 +104,12 @@ if __name__ == '__main__':
                 output_folder = os.path.join(town_path, key)
                 label_folder  = os.path.join(output_folder, "label")
                 calib_folder  = os.path.join(output_folder, "calib")
+                # # Rename the old calib and labels
+                # if os.path.exists(label_folder):
+                #     os.system("mv " + label_folder + " " + label_folder + "_v0")
+                # if os.path.exists(calib_folder):
+                #     os.system("mv " + calib_folder + " " + calib_folder + "_v0")
+                # continue
                 os.makedirs(label_folder, exist_ok= True)
                 os.makedirs(calib_folder, exist_ok= True)
 
