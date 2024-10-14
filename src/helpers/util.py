@@ -206,6 +206,7 @@ def get_calib_text(p2, gd_to_cam= np.eye(4)):
     calib_text.append("P0: " + format_one_matrix(identity) + "\n")
     calib_text.append("P1: " + format_one_matrix(identity) + "\n")
     calib_text.append("P2: " + format_one_matrix(p2) + "\n")
+    calib_text.append("P3: " + format_one_matrix(identity) + "\n")
     calib_text.append("R0_rect: " + format_one_matrix(identity_3) + "\n")
     calib_text.append("Tr_velo_to_cam: " + format_one_matrix(identity) + "\n")
     calib_text.append("Tr_imu_to_velo: " + format_one_matrix(identity) + "\n")
