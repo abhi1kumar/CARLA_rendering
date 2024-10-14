@@ -59,12 +59,18 @@ if __name__ == '__main__':
     cams   = ["CAM_FRONT"]
     color_list = ['r', 'b', 'k', 'pink']
 
+    # ==============================================================================================
+    # Conversion from left to right-handed coordinate system
+    # ==============================================================================================
     left_to_right = np.eye(4)
     left_to_right[1, 1] = -1
     right_to_left = np.linalg.inv(left_to_right)
 
-    kitti_gd_to_carla_left = np.zeros((4, 4))
-    #   KITTI                          CARLA
+    # ==============================================================================================
+    # Conversion from ego ground to left-handed coordinate system
+    # ==============================================================================================
+    ego_gd_to_carla_left = np.zeros((4, 4))
+    #   Ego gd (right)           CARLA (left)
     #      Z                     Z (up)   X
     #     /                        |     /
     #    /                         |    /
@@ -79,16 +85,19 @@ if __name__ == '__main__':
     #   CARLA coordinates = | 0  0  1|  | X |
     #                       | 1  0  0|  | Y |
     #                       | 0 -1  0|  | Z |
-    kitti_gd_to_carla_left[0, 2] =  1
-    kitti_gd_to_carla_left[1, 0] =  1
-    kitti_gd_to_carla_left[2, 1] = -1
-    kitti_gd_to_carla_left[3, 3] =  1
-
-    carla_left_to_kitti_gd = np.linalg.inv(kitti_gd_to_carla_left)
+    ego_gd_to_carla_left[0, 2] =  1
+    ego_gd_to_carla_left[1, 0] =  1
+    ego_gd_to_carla_left[2, 1] = -1
+    ego_gd_to_carla_left[3, 3] =  1
+    carla_left_to_ego_gd = np.linalg.inv(ego_gd_to_carla_left)
 
     # All intrinsics
     nusccalib = read_json('nusccalib.json')
 
+
+    # ==============================================================================================
+    # Run for all height_configs and town names
+    # ==============================================================================================
     #Scene level
     for height_config in list_of_heights:
         for town in list_of_towns:
@@ -98,12 +107,20 @@ if __name__ == '__main__':
                 continue
 
             # Changing origin of the 3D space
-            # KITTI origin is center of camera, while CARLA origin is on ground
+            # KITTI origin        = optical center of ego camera
+            # KITTI ground origin = ground below the ego camera
+            # Ego origin          = ground at the ego car 3D center.
+            # These numbers can be referenced from nusccalib.json[scene_index]['CAM_FRONT']['trans']
             kitti_gd_to_kitti_cam = np.eye(4)
             kitti_gd_to_kitti_cam[1, 3] = 1.51095763913
             if height_config != 'pitch0':
-                kitti_gd_to_kitti_cam[1, 3] += inch_2_meter(float(height_config.replace("height")))
+                kitti_gd_to_kitti_cam[1, 3] += inch_2_meter(float(height_config.replace("height", "")))
             kitti_cam_to_kitti_gd = np.linalg.inv(kitti_gd_to_kitti_cam)
+
+            ego_gd_to_kitti_cam    = copy.deepcopy(kitti_gd_to_kitti_cam)
+            ego_gd_to_kitti_cam[0, 3] = 0.0159456324149
+            ego_gd_to_kitti_cam[2, 3] = -1.70079118954
+            kitti_cam_to_ego_gd = np.linalg.inv(ego_gd_to_kitti_cam)
 
             for i in range(num_folders):
                 key = str(i)
@@ -128,16 +145,19 @@ if __name__ == '__main__':
                    gt['cam_adjust'] = {k: {'fov': 0.0, 'yaw': 0.0} for k in CARLA_CAMORDER}
                 calib = nusccalib[gt['scene_calib']]['CAM_FRONT']
 
+                # Extrinsics are in KITTI style right-handed coordinate system.
                 intrins, rots, trans = get_image_data(cams, nusccalib[gt['scene_calib']], gt['cam_adjust'], W, H, pitch, yaw, height)
-
                 intrins_4x4 = np.eye(4)
                 intrins_4x4[:3, :3] = intrins[0]
                 extrins_4x4 = np.eye(4)
                 extrins_4x4[:3, :3] = rots[0].transpose(1,0)
                 extrins_4x4[:3,  3] = np.matmul(rots[0].transpose(1,0), -trans[0].reshape(-1, 1))[:, 0]
-                p2_right = intrins_4x4 @ extrins_4x4
 
-                p2       = p2_right @ left_to_right @ kitti_gd_to_carla_left @ kitti_cam_to_kitti_gd
+                # We define two p2s:
+                # 1) p2_right : Projecting 3D coordinates in CARLA left-handed system to image coordinates
+                # 2) p2       : Projecting 3D coordinates in KITTI coordinates to image coordinates
+                p2_right = intrins_4x4 @ extrins_4x4
+                p2       = p2_right @ left_to_right @ ego_gd_to_carla_left @ kitti_cam_to_ego_gd
 
                 for fo in range(10):
                     img_key    =  str(fo).zfill(4) + "_00"
@@ -146,11 +166,17 @@ if __name__ == '__main__':
                     else:
                         image_path = os.path.join(town_path, key, "image", img_key + ".jpg")
 
+                    # ==============================================================================
+                    # Write calib
+                    # ==============================================================================
                     output_calib_path = os.path.join(calib_folder, img_key + ".txt")
                     output_label_path = os.path.join(label_folder, img_key + ".txt")
                     calib_text = get_calib_text(p2, kitti_gd_to_kitti_cam)
                     write_lines(path= output_calib_path, lines_with_return_character= calib_text)
 
+                    # ==============================================================================
+                    # Process labels and write
+                    # ==============================================================================
                     left_boxes = np.array(gt['boxes'][fo]) # N x 4 x 8
                     if left_boxes.shape[0] == 0:
                         write_lines(path= output_label_path, lines_with_return_character= [])
@@ -174,7 +200,7 @@ if __name__ == '__main__':
                     num_boxes = centers.shape[0]
                     kitti_dims    = wlh[:, [2,0,1]]
                     centers_1     = np.vstack((centers.T, np.ones((1, num_boxes))))   # 4 x N
-                    kitti_centers = np.matmul(kitti_gd_to_kitti_cam @ carla_left_to_kitti_gd, centers_1).T       # N x 4
+                    kitti_centers = np.matmul(ego_gd_to_kitti_cam @ carla_left_to_ego_gd, centers_1).T       # N x 4
                     kitti_yaw     = np.arctan2(sin_yaw, cos_yaw)
                     kitti_alpha   = convertRot2Alpha(kitti_yaw, z3d= kitti_centers[:, 2], x3d= kitti_centers[:, 0])
 
