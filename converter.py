@@ -16,7 +16,8 @@ matplotlib.use( 'tkagg')
 from src.helpers.file_io import read_json, read_numpy, read_image, write_lines
 from src.helpers.truncation_occlusion import project_3d_points_in_4D_format, crop_boxes_in_canvas, \
     calculate_truncation, calculate_occlusion_semantics
-from src.helpers.util import get_box, get_image_data, convertRot2Alpha, get_calib_text, convert_seman_ids_to_labels
+from src.helpers.util import get_box, get_image_data, convertRot2Alpha, get_calib_text, convert_seman_ids_to_labels, \
+    inch_2_meter
 
 np.set_printoptions   (precision=2, suppress= True)
 
@@ -96,6 +97,13 @@ if __name__ == '__main__':
             if not os.path.exists(town_path):
                 continue
 
+            # Changing origin of the 3D space
+            # KITTI origin is center of camera, while CARLA origin is on ground
+            ground_to_camera = np.eye(4)
+            ground_to_camera[1, 3] = 1.51095763913
+            if height_config != 'pitch0':
+                ground_to_camera[1, 3] += inch_2_meter(float(height_config.replace("height")))
+
             for i in range(num_folders):
                 key = str(i)
                 json_folder_path = os.path.join(town_path, key, 'info.json')
@@ -126,9 +134,9 @@ if __name__ == '__main__':
                 extrins_4x4 = np.eye(4)
                 extrins_4x4[:3, :3] = rots[0].transpose(1,0)
                 extrins_4x4[:3,  3] = np.matmul(rots[0].transpose(1,0), -trans[0].reshape(-1, 1))[:, 0]
-                p2_right = np.matmul(intrins_4x4, extrins_4x4)
+                p2_right = intrins_4x4 @ extrins_4x4
 
-                p2       = np.matmul(np.matmul(p2_right, left_to_right), kitti_to_carla_left)
+                p2       = p2_right @ left_to_right @ kitti_to_carla_left
 
                 for fo in range(10):
                     img_key    =  str(fo).zfill(4) + "_00"
@@ -142,13 +150,13 @@ if __name__ == '__main__':
                     calib_text = get_calib_text(p2)
                     write_lines(path= output_calib_path, lines_with_return_character= calib_text)
 
-                    gt_boxes = np.array(gt['boxes'][fo]) # N x 4 x 8
-                    if gt_boxes.shape[0] == 0:
+                    left_boxes = np.array(gt['boxes'][fo]) # N x 4 x 8
+                    if left_boxes.shape[0] == 0:
                         write_lines(path= output_label_path, lines_with_return_character= [])
                         continue
 
                     # Project 3D to 2D
-                    temp  = gt_boxes.transpose(1, 0, 2) # 4 x N x 8
+                    temp  = left_boxes.transpose(1, 0, 2) # 4 x N x 8
                     temp[1] *= -1.0
                     temp  = temp.reshape(4, -1)         # 4 X N*8
                     # temp  = np.matmul(left_to_right_matrix, temp)
@@ -156,7 +164,7 @@ if __name__ == '__main__':
                     pts2d = project_3d_points_in_4D_format(p2_right, points_4d= temp, pad_ones=False) # 4 x N*8
                     pts2d = pts2d.reshape(4, -1, 8).transpose(1, 0, 2) # N x 4 x 8
 
-                    boxes   = [get_box(box) for box in gt_boxes]
+                    boxes   = [get_box(box) for box in left_boxes]
                     centers = np.array([box.center for box in boxes])
                     wlh     = np.array([box.wlh for box in boxes])
                     sin_yaw = -np.array([box.rotation_matrix[0, 0] for box in boxes])
