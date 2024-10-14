@@ -1,11 +1,13 @@
 # CARLA Rendering Code
 
-This repository extracts CARLA datasets at different extrinsics. Please note that the default intrinsics are based on the nuScenes dataset and loaded from the included JSON files. 
+This repository extracts CARLA datasets at different extrinsics. The intrinsics are from the nuScenes dataset and loaded from the included JSON files `nusscalib.json` and `info.json`.  This repository uses the following coordinate systems:
 
-Note: The convention in this code is 
-X: right
-Y: up
-Z: outside
+Coordinate System | Name | Left/Right Handed | X | Y | Z | Center
+-- | -- | -- | -- | -- | -- | -- 
+Rendering / Carla 3D Boxes | Unreal | Left | Inside | Right | Up | Ego car center 
+Extrinsics Calc. | KITTI Image | Right | Right | Down | Inside | Ego car center
+Images / KITTI 3D Boxes | KITTI Image | Right | Right | Down | Inside | Ego camera top-left corner
+
 
 ## Prerequisites
 
@@ -117,6 +119,7 @@ Arrange data as follows:
 ### Run
 
 ```bash
+export CARLAPATH="/home/abhinav/project/CARLA_0.9.14"
 python converter.py
 ```
 
