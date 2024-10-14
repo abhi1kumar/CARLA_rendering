@@ -2,7 +2,7 @@
 
 This repository extracts CARLA datasets at different extrinsics. The intrinsics are from the nuScenes dataset and loaded from the included JSON files `nusscalib.json` and `info.json`.  This repository uses the following coordinate systems:
 
-Coordinate System | Name | Left/Right Handed | X | Y | Z | Center
+Coordinate System | Name | Handed | X | Y | Z | Center
 -- | -- | -- | -- | -- | -- | -- 
 Rendering / Carla 3D Boxes | Unreal | Left | Inside | Right | Up | Ego car center 
 Extrinsics Calc. | KITTI Image | Right | Right | Down | Inside | Ego car center
