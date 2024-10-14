@@ -191,7 +191,7 @@ def format_one_matrix(t):
     t = t[:3, :].flatten()
     return np.array2string(t, formatter={'float_kind': float_formatter}).replace("\n", "").replace("[", "").replace("]", "")
 
-def get_calib_text(p2, extrinsics= np.eye(4)):
+def get_calib_text(p2, gd_to_cam= np.eye(4)):
     identity = np.eye(4)
 
     calib_text = []
@@ -208,6 +208,6 @@ def get_calib_text(p2, extrinsics= np.eye(4)):
     calib_text.append("R0_rect: " + format_one_matrix(identity) + "\n")
     calib_text.append("Tr_velo_to_cam: " + format_one_matrix(identity) + "\n")
     calib_text.append("Tr_imu_to_velo: " + format_one_matrix(identity) + "\n")
-    calib_text.append("extrinsics: " + format_one_matrix(extrinsics) + "\n")
+    calib_text.append("gd_to_cam: " + format_one_matrix(gd_to_cam) + "\n")
 
     return calib_text

@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
                     output_calib_path = os.path.join(calib_folder, img_key + ".txt")
                     output_label_path = os.path.join(label_folder, img_key + ".txt")
-                    calib_text = get_calib_text(p2)
+                    calib_text = get_calib_text(p2, kitti_gd_to_kitti_cam)
                     write_lines(path= output_calib_path, lines_with_return_character= calib_text)
 
                     left_boxes = np.array(gt['boxes'][fo]) # N x 4 x 8
