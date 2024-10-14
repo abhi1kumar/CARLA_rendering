@@ -38,6 +38,36 @@ def get_box(box):
     nbox = Box(center, dims, newquat)
     return nbox
 
+def get_kitti_box(box):
+    diffw = box[:3, 1] - box[:3, 2]
+    diffl = box[:3, 0] - box[:3, 1]
+    diffh = box[:3, 4] - box[:3, 0]
+
+    center = (box[:3, 4] + box[:3, 2]) / 2
+
+    dims = [np.linalg.norm(diffw), np.linalg.norm(diffl), np.linalg.norm(diffh)]
+
+    EPS = 1e-2
+    if dims[0] < EPS or dims[1] < EPS or dims[2] < EPS:
+        rot = np.eye(3)
+    else:
+        rot = np.zeros((3, 3))
+        rot[:, 1] = diffw / dims[0]
+        rot[:, 0] = diffl / dims[1]
+        rot[:, 2] = diffh / dims[2]
+
+        # quat = Quaternion(matrix=rot)
+        # again, carla flips y axis
+        # newquat = Quaternion(quat.w, -quat.x, quat.y, -quat.z)
+        # again, carla flips y axis
+        # See https://stackoverflow.com/a/38124709
+        rot[:, 1] *= -1
+    quat = Quaternion(matrix=rot)
+    newquat = quat
+
+    nbox = Box(center, dims, newquat)
+    return nbox
+
 
 def get_ixes(split="train"):
     # if split == "train":
@@ -142,6 +172,9 @@ def project_3d_points_in_4D_format(p2, points_4d, pad_ones= False):
 
     return coord2d
 
+def inch_2_meter(inches):
+    return inches * 0.0254
+
 def convert_seman_ids_to_labels(seman_ids, mapping):
     output = []
     for id in seman_ids:
@@ -158,7 +191,7 @@ def format_one_matrix(t):
     t = t[:3, :].flatten()
     return np.array2string(t, formatter={'float_kind': float_formatter}).replace("\n", "").replace("[", "").replace("]", "")
 
-def get_calib_text(p2):
+def get_calib_text(p2, extrinsics= np.eye(4)):
     identity = np.eye(4)
 
     calib_text = []
@@ -175,5 +208,6 @@ def get_calib_text(p2):
     calib_text.append("R0_rect: " + format_one_matrix(identity) + "\n")
     calib_text.append("Tr_velo_to_cam: " + format_one_matrix(identity) + "\n")
     calib_text.append("Tr_imu_to_velo: " + format_one_matrix(identity) + "\n")
+    calib_text.append("extrinsics: " + format_one_matrix(extrinsics) + "\n")
 
     return calib_text

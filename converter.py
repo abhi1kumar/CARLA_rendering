@@ -10,6 +10,8 @@ import datetime
 
 from matplotlib import pyplot as plt
 from plot.common_operations import *
+import matplotlib
+matplotlib.use( 'tkagg')
 
 from src.helpers.file_io import read_json, read_numpy, read_image, write_lines
 from src.helpers.truncation_occlusion import project_3d_points_in_4D_format, crop_boxes_in_canvas, \
