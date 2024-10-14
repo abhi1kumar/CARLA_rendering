@@ -79,6 +79,51 @@ python main.py scrape --outf=SAVEPATH --headless=True --rnd_seed=42 --filter_occ
 - HEIGHT: change in height (in meters)
 - MAPNAME: We use Town03 for training and Town05 for testing datasets
 
+## CARLA to KITTI Converter
+
+Converts the CARLA dataset (with depth and semantics) to KITTI style detection labels.
+
+### Environment
+
+```bash
+conda create -n carla python=3.8 -y
+conda activate carla
+pip install nuscenes-devkit pygame networkx matplotlib
+```
+
+### Data
+
+Arrange data as follows:
+
+```
+├── data
+│      └── carla
+│             └── carla_abhinav
+│                    ├── pitch0
+│                    │      ├── town03
+│                    │      └── town05
+│                    ├── height6
+│                    │      ├── town03
+│                    │      └── town05
+│                    ├── height-6
+│                    │      ├── town03
+│                    │      └── town05
+│                    ├── ...
+│                    └── height30
+│                           ├── town03
+│                           └── town05
+```
+
+### Run
+
+```bash
+python converter.py
+```
+
+The script will create new folders `calib` and `label` inside the individual 2500 folders of each town.
+
+
+
 ## License and Citation
 
 The scraping code is based on the ICCV23 work. Please consider starring the repo and citing
