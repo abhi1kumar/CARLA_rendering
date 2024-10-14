@@ -93,18 +93,11 @@ pip install nuscenes-devkit pygame networkx matplotlib
 
 ### Data
 
-Copy the `nusccalib.json` file
-
-```
-cp nusccalib.json data/carla
-```
-
 Arrange data as follows:
 
 ```
 ├── data
 │      └── carla
-│             ├── nusccalib.json
 │             └── carla_abhinav
 │                    ├── pitch0
 │                    │      ├── town03
