@@ -14,7 +14,7 @@ num_files () {
         DIR=$(pwd)
         NUM_FOLDERS=$(ls -1 | wc -l)
         NUM_FILES=$(find . -type f | wc -l)
-        printf "%15s %6d %10d\n" "$1" $NUM_FOLDERS $NUM_FILES
+        printf "%16s %6d %10d\n" "$1" $NUM_FOLDERS $NUM_FILES
         cd ../..
     else
         printf "%15s ABSENT\n" "$1"
@@ -35,5 +35,18 @@ num_files "height18/town03"
 num_files "height18/town05"
 num_files "height24/town03"
 num_files "height24/town05"
+num_files "height27/town03"
+num_files "height27/town05"
 num_files "height30/town03"
 num_files "height30/town05"
+
+num_files "height-6/town03"
+num_files "height-6/town05"
+num_files "height-12/town03"
+num_files "height-12/town05"
+num_files "height-18/town03"
+num_files "height-18/town05"
+num_files "height-24/town03"
+num_files "height-24/town05"
+num_files "height-27/town03"
+num_files "height-27/town05"
