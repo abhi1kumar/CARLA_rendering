@@ -58,7 +58,7 @@ norm = matplotlib.colors.Normalize(vmin=0.0, vmax=80.0)
 vmin = 0
 vmax = 100
 c = 5
-ilist = sorted(np.random.choice(17, 17, replace= False))
+ilist = [4]#sorted(np.random.choice(17, 17, replace= False))
 
 P2 = np.eye(4)
 P2[0, 2] = 256.0
@@ -66,13 +66,14 @@ P2[1, 2] = 256.0
 P2[0, 0] = 405.24
 P2[1, 1] = 405.24
 
-heights_list = ['pitch0', 'height6', 'height12', 'height18', 'height24', 'height30']
+heights_list = ['height-27', 'height-24', 'height-18', 'height-12', 'height-6', 'height0', 'height6', 'height12', 'height18', 'height24', 'height30']
 # data/carla/height30/town03/
 for height in heights_list:
-    folder = os.path.join('data/carla/', height, 'town03')
+    folder = os.path.join('data/carla/carla_abhinav/', height, 'town03')
 
     for i in (ilist):
         key = str(i)
+        os.makedirs("images/gt/" + key + "/", exist_ok= True)
         image_path  = os.path.join(folder, key, 'image', '0000_00.jpg')
         depth_path  = os.path.join(folder, key, 'depth', '0000_00.npy')
         seman_path  = os.path.join(folder, key, 'seman', '0000_00.npy')
@@ -80,6 +81,7 @@ for height in heights_list:
         seman_path3 = os.path.join(folder, key, 'seman', '0000_00.png')
         lidar_path  = os.path.join(folder, key, 'lidar', '0000_00.npy')
 
+        print(image_path)
         image = read_image(image_path, rgb= True)
         depth = read_numpy(depth_path)
         seman = read_numpy(seman_path)
@@ -145,7 +147,7 @@ for height in heights_list:
             ax.add_patch(
                 Circle((coord2d[j, 0], coord2d[j, 1]), radius=1, color=cmap(norm(coord2d[j, 2]))))
 
-        savefig(plt, "images/" + height + "_{}_0000_seman_depth_lidar.png".format(key))
+        savefig(plt, "images/gt/" + key + "/" + height + "_{}_0000_seman_depth_lidar.png".format(key))
         # plt.show()
         plt.close()
         # sys.exit(0)

@@ -29,6 +29,11 @@ size       = (10, 6)
 fs         = 28
 matplotlib.rcParams.update({'font.size': fs})
 
+# (length, space)
+# example
+# plt.plot(x, y, '--', dashes= params.dashes)
+dashes      = (3, 0.6)
+
 # legend properties
 # example
 # plt.legend(handles= legend_handles, loc= "upper right", fontsize= legend_fs, borderaxespad= legend_border_axes_plot_border_pad, borderpad= legend_border_pad, labelspacing= legend_vertical_label_spacing, handletextpad= legend_marker_text_spacing)
@@ -69,3 +74,79 @@ color_set2_pink_light  = np.array([255, 213, 225.0])
 display_frequency = 500
 min_iou2d_overlap = 0.5
 frac_to_keep      = 0.7
+
+semantic_color_map = {'0': np.array([0, 0, 0]), '1': np.array([255, 0, 0])}
+color_seman_blue     = np.array([100, 150, 245.0])
+color_seman_building = np.array([47, 79, 79.0])
+
+# import seaborn as sns
+colors_temp = sns.color_palette("magma", 20)
+color_seaborn_0 = colors_temp[3]
+color_seaborn_1 = colors_temp[6]
+color_seaborn_15= colors_temp[10]
+color_seaborn_2 = colors_temp[13]
+color_seaborn_3 = colors_temp[15]
+color_seaborn_4 = colors_temp[17]
+color_seaborn_5 = colors_temp[19]
+
+# Semantic Segmentation Colors
+# https://github.com/PRBonn/semantic-kitti-api/blob/master/config/semantic-kitti.yaml
+# categories= {0: 'invalid',
+# 1: 'occlusion',
+# 10: 'car',
+# 11: 'rider',
+# 13: 'truck',
+# 30: 'person',
+# 40: 'road',
+# 48: 'sidewalk',
+# 50: 'building',
+# 51: 'wall',
+# 70: 'vegetation',
+# 72: 'terrain',
+# }
+
+# RGB
+# semantic_color_map = {0: [0, 0, 0], 1: [255, 0, 0]}
+# 10: [100, 150, 245],
+# 11: [100, 230, 245],
+# 13: [100, 80, 250],
+# 30: [255, 30, 30],
+# 40: [255, 0, 255],
+# 48: [75, 0, 75],
+# 50: [255, 200, 0],
+# 51: [255, 120, 50],
+# 70: [0, 175, 0],
+# 72: [150, 240, 80],
+# }
+
+
+cityscapes_color_palette = {0: (0, 0, 0.), 
+                            1: (128, 64, 128.), 
+                            2: (244, 35, 232.), 
+                            3: (70, 70, 70.), 
+                            4: (102, 102, 156.), 
+                            5: (190, 153, 153.), 
+                            6: (153, 153, 153.), 
+                            7: (250, 170, 30.),
+                            8: (220, 220, 0.), 
+                            9: (107, 142, 35.), 
+                            10:	(152, 251, 152.), 
+                            11:	(70, 130, 180.), 
+                            12:	(220, 20, 60.), 
+                            13: (255, 0, 0.), 
+                            14: (0, 0, 142.), 
+                            15: (0, 0, 70.), 
+                            16: (0, 60, 100.), 
+                            17:	(0, 80, 100.), 
+                            18: (0, 0, 230.), 
+                            19: (119, 11, 32.), 
+                            20: (110, 190, 160.), 
+                            21: (170, 120, 50.), 
+                            22: (55, 90, 80.), 
+                            23: (45, 60, 150.), 
+                            24: (157, 234, 50.), 
+                            25: (81, 0, 81.), 
+                            26: (150, 100, 100.), 
+                            27: (230, 150, 140.), 
+                            28: (180, 165, 180.)
+                            }
