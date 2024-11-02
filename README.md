@@ -1,4 +1,6 @@
-# CARLA Rendering Code
+# CARLA Rendering
+
+<img src="images/sample.gif" width="900">
 
 This repository extracts CARLA datasets at different extrinsics. The intrinsics are from the nuScenes dataset and loaded from the included JSON files `nusscalib.json` and `info.json`.  This repository uses the following coordinate systems:
 
@@ -132,15 +134,6 @@ The script will create new folders `calib` and `label` inside the individual 250
 The scraping code is based on the ICCV23 work. Please consider starring the repo and citing
 
 ```bibtex
-@inproceedings{kumar2024extrinsics,
-    title = {Viewpoint Robustness for Monocular 3D Object Detection},
-    author = {Kumar, Abhinav and Guo, Yuliang and Liu, Xiaoming},
-    booktitle = {in submission},
-    year = {2024}
-}
-```
-
-```bibtex
 @inproceedings{tzofi2023view,
     title = {Towards Viewpoint Robustness in Bird's Eye View Segmentation},
     author = {Klinghoffer, Tzofi and Philion, Jonah and Chen, Wenzheng and Litany, Or and Gojcic, Zan
@@ -150,8 +143,18 @@ The scraping code is based on the ICCV23 work. Please consider starring the repo
 }
 ```
 
-Copyright © 2024, Michigan State University. All rights reserved.
+```bibtex
+@inproceedings{kumar2024extrinsics,
+    title = {Viewpoint Robustness for Monocular 3D Object Detection},
+    author = {Kumar, Abhinav and Guo, Yuliang and Liu, Xiaoming},
+    booktitle = {in submission},
+    year = {2024}
+}
+```
+
 Copyright © 2023, NVIDIA Corporation. All rights reserved.
+
+Copyright © 2024, Michigan State University. All rights reserved.
 
 ## Contact
 For questions, feel free to post here or drop an email to this address- ```abhinav3663@gmail.com```
