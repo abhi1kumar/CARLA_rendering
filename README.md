@@ -18,7 +18,7 @@ Download CARLA (either in Docker or directly on your server). If using Docker, p
 ```bash
 conda create -n carla python=3.8 -y
 conda activate carla
-pip install --user pygame numpy && pip3 install --user pygame numpy
+pip install --user pygame numpy nuscenes-devkit networkx matplotlib
 ```
 
 Go to [CARLA download page](https://github.com/carla-simulator/carla/blob/master/Docs/download.md). Click on [CARLA 0.9.14](https://github.com/carla-simulator/carla/releases/tag/0.9.14/)
@@ -86,14 +86,6 @@ python main.py scrape --outf=SAVEPATH --headless=True --rnd_seed=42 --filter_occ
 ## CARLA to KITTI Converter
 
 Converts the CARLA dataset (with depth and semantics) to KITTI style detection labels.
-
-### Environment
-
-```bash
-conda create -n carla python=3.8 -y
-conda activate carla
-pip install nuscenes-devkit pygame networkx matplotlib
-```
 
 ### Data
 
