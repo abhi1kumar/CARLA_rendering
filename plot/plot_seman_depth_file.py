@@ -52,13 +52,22 @@ def project_3d_points_in_4D_format(p2, points_4d, pad_ones= False):
 
     return coord2d
 
-cmap = matplotlib.cm.get_cmap('magma_r')
-norm = matplotlib.colors.Normalize(vmin=0.0, vmax=80.0)
-
 vmin = 0
-vmax = 100
+vmax = 50
+
+cmap = matplotlib.cm.get_cmap('magma_r')
+norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
+
 c = 5
 ilist = [4]#sorted(np.random.choice(17, 17, replace= False))
+flist = [0] * len(ilist)
+town = 'town03'
+
+ilist = [1054]#, 1021, 1033, 1061, 1077, 1114, 1209, 1278]#sorted(np.random.choice(1500, 200, replace= False))
+flist = [9]#, 5, 3, 5, 3, 1, 6, 0]
+town = 'town05'
+
+heights_list = ['height-27', 'height-24', 'height-18', 'height-12', 'height-6', 'height0', 'height6', 'height12', 'height18', 'height24', 'height30']
 
 P2 = np.eye(4)
 P2[0, 2] = 256.0
@@ -66,22 +75,20 @@ P2[1, 2] = 256.0
 P2[0, 0] = 405.24
 P2[1, 1] = 405.24
 
-heights_list = ['height-27', 'height-24', 'height-18', 'height-12', 'height-6', 'height0', 'height6', 'height12', 'height18', 'height24', 'height30']
-# data/carla/height30/town03/
 for height in heights_list:
-    folder = os.path.join('data/carla/carla_abhinav/', height, 'town03')
+    folder = os.path.join('data/carla/carla_abhinav/', height, town)
 
-    for i in (ilist):
+    for i, f in zip(ilist, flist):
         key = str(i)
-        os.makedirs("images/gt/" + key + "/", exist_ok= True)
-        image_path  = os.path.join(folder, key, 'image', '0000_00.jpg')
-        depth_path  = os.path.join(folder, key, 'depth', '0000_00.npy')
-        seman_path  = os.path.join(folder, key, 'seman', '0000_00.npy')
-        seman_path2 = os.path.join(folder, key, 'seman', '0000_00.jpg')
-        seman_path3 = os.path.join(folder, key, 'seman', '0000_00.png')
-        lidar_path  = os.path.join(folder, key, 'lidar', '0000_00.npy')
+        f1 = str(f).zfill(4)
+        image_path  = os.path.join(folder, key, 'image', f1 + '_00.jpg')
+        depth_path  = os.path.join(folder, key, 'depth', f1 + '_00.npy')
+        seman_path  = os.path.join(folder, key, 'seman', f1 + '_00.npy')
+        seman_path2 = os.path.join(folder, key, 'seman', f1 + '_00.jpg')
+        seman_path3 = os.path.join(folder, key, 'seman', f1 + '_00.png')
+        lidar_path  = os.path.join(folder, key, 'lidar', f1 + '_00.npy')
 
-        print(image_path)
+        # print(image_path)
         image = read_image(image_path, rgb= True)
         depth = read_numpy(depth_path)
         seman = read_numpy(seman_path)
@@ -89,8 +96,6 @@ for height in heights_list:
 
         coord2d = project_3d_points_in_4D_format(p2= P2, points_4d= lidar[:, :3].transpose(), pad_ones= True).transpose() #[N, 4]
         idx = np.random.choice(np.arange(coord2d.shape[0]), 20)
-        # print(lidar[idx])
-        print(coord2d.shape)
         mask = coord2d[:, 2] > 0
         coord2d = coord2d[mask]
         mask = coord2d[:, 0] > 0
@@ -101,7 +106,8 @@ for height in heights_list:
         coord2d = coord2d[mask]
         mask = coord2d[:, 1] < 512
         coord2d = coord2d[mask]
-        print(coord2d.shape)
+        # print(lidar[idx])
+        # print(coord2d.shape)
 
         if os.path.exists(seman_path2) and os.path.exists(seman_path3):
             c = 6
@@ -113,13 +119,11 @@ for height in heights_list:
             diff = 0
 
         plt.figure(figsize= (24,6), dpi= params.DPI)
-        # plt.suptitle('{}_0000'.format(key))
         plt.subplot(1,c,1)
         plt.imshow(image)
         plt.axis('off')
         plt.title('Image'.format(key))
         plt.subplot(1,c,2)
-        # plt.imshow(seman, cmap= 'viridis_r', vmin= 0, vmax= 30)
         plt.imshow(map_image_via_pallete(seman, params.cityscapes_color_palette))
         plt.axis('off')
         if os.path.exists(seman_path2) and os.path.exists(seman_path3):
@@ -147,7 +151,9 @@ for height in heights_list:
             ax.add_patch(
                 Circle((coord2d[j, 0], coord2d[j, 1]), radius=1, color=cmap(norm(coord2d[j, 2]))))
 
-        savefig(plt, "images/gt/" + key + "/" + height + "_{}_0000_seman_depth_lidar.png".format(key))
+
+        out_folder = os.path.join("images/gt", town, key)
+        os.makedirs(out_folder, exist_ok= True)
+        savefig(plt, os.path.join(out_folder, height + "_{}_".format(key) + f1 + "_seman_depth_lidar.png"), newline= False)
         # plt.show()
         plt.close()
-        # sys.exit(0)
