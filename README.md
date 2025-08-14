@@ -2,14 +2,34 @@
 
 <img src="images/sample.gif" width="900">
 
-This repository extracts CARLA datasets at different extrinsics. The intrinsics are from the nuScenes dataset and loaded from the included JSON files `nusscalib.json` and `info.json`.  This repository uses the following coordinate systems:
+This repository extracts CARLA datasets at different camera intrinsics and extrinsics. The scraping code is based on the [Viewpoint Robustness, ICCV23](https://nvlabs.github.io/viewpoint-robustness/). The intrinsics are from the nuScenes dataset and loaded from the included JSON files `nusscalib.json` and `info.json`.  
 
-Coordinate System | Name | Handed | X | Y | Z | Center
--- | -- | -- | -- | -- | -- | -- 
-Rendering / Carla 3D Boxes | Unreal | Left | Inside | Right | Up | Ego car center 
-Extrinsics Calc. | KITTI Image | Right | Right | Down | Inside | Ego car center
-Images / KITTI 3D Boxes | KITTI Image | Right | Right | Down | Inside | Ego camera top-left corner
+Copyright © 2023, NVIDIA Corporation. All rights reserved.
 
+Copyright © 2024, Michigan State University. All rights reserved.
+
+## Citation
+
+If you find our work useful in your research, please consider starring the repo and citing both these works:
+
+```bibtex
+@inproceedings{tzofi2023view,
+    title = {Towards Viewpoint Robustness in Bird's Eye View Segmentation},
+    author = {Klinghoffer, Tzofi and Philion, Jonah and Chen, Wenzheng and Litany, Or and Gojcic, Zan
+        and Joo, Jungseock and Raskar, Ramesh and Fidler, Sanja and Alvarez, Jose},
+    booktitle = {ICCV},
+    year = {2023}
+}
+```
+
+```bibtex
+@inproceedings{kumar2025charm3r,
+    title = {{CHARM3R}: Towards Unseen Camera Height Robust Monocular 3D Detector},
+    author = {Kumar, Abhinav and Guo, Yuliang and Zhang, Zhihao and Huang, Xinyu and Ren, Liu and Liu, Xiaoming},
+    booktitle = {ICCV},
+    year = {2025}
+}
+```
 
 ## Prerequisites
 
@@ -42,7 +62,7 @@ Finally install other dependencies:
 pip install nuscenes-devkit pygame networkx
 ```
 
-Please note that we used CARLA 0.9.8, but the code is also compatible with later versions of CARLA. You will need to update the CARLAPATH in src/sim\_nuscenes.py to point to the correct .egg files, dependent on your version and the location where CARLA was downloaded.
+Please note that we used CARLA 0.9.8, but the code is also compatible with later versions of CARLA. You will need to update the CARLAPATH in `src/sim\_nuscenes.py` to point to the correct `.egg` files, dependent on your version and the location where CARLA was downloaded.
 
 ## Rendering
 
@@ -50,9 +70,23 @@ Please note that we used CARLA 0.9.8, but the code is also compatible with later
 export CARLAPATH="/home/abhinav/project/CARLA_0.9.14"
 ```
 
-### Bash Command for Rendering One Configuration
+#### Render All Heights Data
 
-Bash script to render a train and test set (please note paths in bash script will need to be updated):
+```bash
+bash run_all_height.sh
+```
+
+#### Render All Configurations with Height, Yaw, Pitch Variations
+
+Python command to render All train and test sets (please note that the shell command used in the script will need to be updated, as it currently uses NVIDIA NGC):
+
+```bash
+python run_all.py
+```
+
+#### Render One Configuration
+
+Bash script to render a train and test set (please note to update paths in bash script):
 
 ```bash
 bash run_new.sh -4_6 pitch_height 0 -4 0.1524 # change description, type of change, yaw, pitch, height
@@ -60,15 +94,7 @@ bash run_new.sh -4_6 pitch_height 0 -4 0.1524 # change description, type of chan
 
 Type of change and change description are concatenated to create the save folder, e.g. pitch\_height-4\_6 indicates images within the folder have modified pitch (-4 degrees) and modified height (6 inches).
 
-### Bash Command for Rendering All Datasets
-
-Python command to render ALL train and test sets (please note that the shell command used in the script will need to be updated, as it currently uses NVIDIA NGC):
-
-```bash
-python run_all.py
-```
-
-### Python Command
+#### Render One Configuration with Python
 
 Python command to render (please note the first line is for starting the CARLA server and should be modified based on your CARLA server path):
 
@@ -85,7 +111,7 @@ python main.py scrape --outf=SAVEPATH --headless=True --rnd_seed=42 --filter_occ
 
 ## CARLA to KITTI Converter
 
-Converts the CARLA dataset (with depth and semantics) to KITTI style detection labels.
+Converts the CARLA dataset (with depth and semantics) to KITTI style detection labels, which can then be used by any KITTI-style detector.
 
 ### Data
 
@@ -120,33 +146,25 @@ python converter.py
 The script will create new folders `calib` and `label` inside the individual 2500 folders of each town.
 
 
+## Coordinate System
 
-## License and Citation
+This repository uses the following coordinate systems:
 
-The scraping code is based on the ICCV23 work. Please consider starring the repo and citing
+Coordinate System | Name | Handed | X | Y | Z | Center
+-- | -- | -- | -- | -- | -- | -- 
+Rendering / Carla 3D Boxes | Unreal | Left | Inside | Right | Up | Ego car center 
+Extrinsics Calc. | KITTI Image | Right | Right | Down | Inside | Ego car center
+Images / KITTI 3D Boxes | KITTI Image | Right | Right | Down | Inside | Ego camera top-left corner
 
-```bibtex
-@inproceedings{tzofi2023view,
-    title = {Towards Viewpoint Robustness in Bird's Eye View Segmentation},
-    author = {Klinghoffer, Tzofi and Philion, Jonah and Chen, Wenzheng and Litany, Or and Gojcic, Zan
-        and Joo, Jungseock and Raskar, Ramesh and Fidler, Sanja and Alvarez, Jose},
-    booktitle = {ICCV},
-    year = {2023}
-}
-```
 
-```bibtex
-@inproceedings{kumar2024extrinsics,
-    title = {Viewpoint Robustness for Monocular 3D Object Detection},
-    author = {Kumar, Abhinav and Guo, Yuliang and Liu, Xiaoming},
-    booktitle = {in submission},
-    year = {2024}
-}
-```
+## Acknowledgements
+We thank the authors of following awesome codebases:
 
-Copyright © 2023, NVIDIA Corporation. All rights reserved.
+- [Viewpoint Robustness](https://nvlabs.github.io/viewpoint-robustness/)
+- [DEVIANT](https://github.com/abhi1kumar/DEVIANT)
 
-Copyright © 2024, Michigan State University. All rights reserved.
+## Contributions
+We welcome contributions to the DEVIANT repo. Feel free to raise a pull request.
 
 ## Contact
 For questions, feel free to post here or drop an email to this address- ```abhinav3663@gmail.com```
