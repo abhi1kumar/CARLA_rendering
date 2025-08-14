@@ -164,7 +164,7 @@ We thank the authors of following awesome codebases:
 - [DEVIANT](https://github.com/abhi1kumar/DEVIANT)
 
 ## Contributions
-We welcome contributions to the DEVIANT repo. Feel free to raise a pull request.
+We welcome contributions to this repo. Feel free to raise a pull request.
 
 ## Contact
 For questions, feel free to post here or drop an email to this address- ```abhinav3663@gmail.com```
