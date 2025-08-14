@@ -2,7 +2,7 @@
 
 <img src="images/sample.gif" width="900">
 
-This repository extracts CARLA datasets at different camera intrinsics and extrinsics. The scraping code is based on the [Viewpoint Robustness, ICCV23](https://nvlabs.github.io/viewpoint-robustness/). The intrinsics are from the nuScenes dataset and loaded from the included JSON files `nusscalib.json` and `info.json`.  
+This repository extracts CARLA datasets at different camera intrinsics and extrinsics. The scraping code is based on the [Viewpoint Robustness, ICCV23](https://nvlabs.github.io/viewpoint-robustness/assets/tzofi2023view.pdf). The intrinsics are from the nuScenes dataset and loaded from the included JSON files `nusscalib.json` and `info.json`.  
 
 Copyright © 2023, NVIDIA Corporation. All rights reserved.
 
@@ -160,7 +160,7 @@ Images / KITTI 3D Boxes | KITTI Image | Right | Right | Down | Inside | Ego came
 ## Acknowledgements
 We thank the authors of following awesome codebases:
 
-- [Viewpoint Robustness](https://nvlabs.github.io/viewpoint-robustness/)
+- [Viewpoint Robustness](https://github.com/NVlabs/viewpoint-robustness)
 - [DEVIANT](https://github.com/abhi1kumar/DEVIANT)
 
 ## Contributions
